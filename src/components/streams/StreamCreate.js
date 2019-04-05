@@ -1,67 +1,55 @@
-import React, {Component} from 'react';
+import React from 'react';
+import {Field, reduxForm} from 'redux-form';
+import {connect} from 'react-redux';
 import {createStream} from "../../actions";
 
-import {connect} from 'react-redux';
 
+class StreamCreate extends React.Component {
+    renderErrorMessage = (meta) => {
+        if (meta.touched && !meta.active && meta.error) {
+            return <div style={{color: 'red'}}>{meta.error}</div>
+        }
+    };
 
-import {Field, reduxForm} from 'redux-form'
-
-
-class StreamCreate extends Component {
-    renderInput({label, input, meta}) {
-        // console.log(meta)
-
-
-        return <div className="field">
-            <label>{label}</label>
-            <input {...input}/>
-            {meta.touched && meta.error ? <p>{meta.error}</p> : null}
+    renderInput = (formProps) => {
+        return (
+        <div className="field">
+            <label>{formProps.label}</label>
+            <input {...formProps.input}/>
+            <div>{this.renderErrorMessage(formProps.meta)}</div>
         </div>
-
-
-    }
+        )
+    };
 
     onSubmit = (formValues) => {
-        console.log(formValues);
         this.props.createStream(formValues);
     };
 
-
     render() {
-        const {props} = this
-        console.log(props)
-        return <div>
-            <form className="form ui" onSubmit={this.props.handleSubmit(this.onSubmit)}>
-                <Field name="title" component={this.renderInput} label="Enter Title"/>
-                <Field name="description" component={this.renderInput} label="Enter Description"/>
-                <button className="ui button primary">Submit</button>
-            </form>
-        </div>
-    }
-}
 
-const validateFunction = (formValues) => {
-    const errors = {};
-
-    if (!formValues.title) {
-        errors.title = 'You must enter a title'
+        return <form className="ui form" onSubmit={this.props.handleSubmit(this.onSubmit)}>
+            <Field name="title" component={this.renderInput} label='Enter title' />
+            <Field name="description" component={this.renderInput} label='Enter description'/>
+            <button className="ui primary button" >Submit</button>
+        </form>
     }
-    if (!formValues.description) {
-        errors.description = 'You must enter a description'
-    }
+};
 
-    return errors
+const validate = (formValues) => {
+   const errors = {};
+   if (!formValues.title){
+       errors.title = "Enter a title!"
+   }
+   if (!formValues.description){
+       errors.description = "Enter a description!"
+   }
+   return errors;
 
 };
 
-
-
-const StreamCreateRF =  reduxForm({
-    form: 'streamCreate',
-    validate: validateFunction,
+const formWrapped = reduxForm({
+    form: 'StreamCreate',
+    validate
 })(StreamCreate);
 
-export default connect(null, {createStream})(StreamCreateRF);
-
-
-
+export default connect(null, {createStream})(formWrapped);
